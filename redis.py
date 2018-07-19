@@ -8,11 +8,15 @@ from opsdroid.database import Database
 
 class RedisDatabase(Database):
     async def connect(self, opsdroid):
+        uri = self.config["uri"] if "uri" in self.config else False
         host = self.config["host"] if "host" in self.config else "localhost"
         port = self.config["port"] if "port" in self.config else "6379"
         database = self.config["database"] if "database" in self.config else 0
-        self.client = await aioredis.create_connection(
-            (host, port), db=database)
+        if uri:
+            self.client = await aioredis.create_connection(uri)
+        else:
+            self.client = await aioredis.create_connection(
+                (host, port), db=database)
 
     async def put(self, key, data):
         data = self.convert_object_to_timestamp(data)
